@@ -25,11 +25,17 @@ def cmd_callback(data):
   global frame_id
   global pub
   global message_type
+  global max_steering_angle
+  global max_speed
+  global allow_reverse
+
+  v = max(min(data.linear.x, max_speed), -max_speed)
+  if not allow_reverse and v < 0.0:
+    v = 0.0
+  steering = convert_trans_rot_vel_to_steering_angle(v, data.angular.z, wheelbase)
+  steering = max(min(steering, max_steering_angle), -max_steering_angle)
   
   if message_type == 'ackermann_drive':
-    v = data.linear.x
-    steering = convert_trans_rot_vel_to_steering_angle(v, data.angular.z, wheelbase)
-    
     msg = AckermannDrive()
     msg.steering_angle = steering
     msg.speed = v
@@ -37,9 +43,6 @@ def cmd_callback(data):
     pub.publish(msg)
 
   else:
-    v = data.linear.x
-    steering = convert_trans_rot_vel_to_steering_angle(v, data.angular.z, wheelbase)
-    
     msg = AckermannDriveStamped()
     msg.header.stamp = rospy.Time.now()
     msg.header.frame_id = frame_id
@@ -56,6 +59,9 @@ if __name__ == '__main__':
     twist_cmd_topic = rospy.get_param('~twist_cmd_topic', '/cmd_vel') 
     ackermann_cmd_topic = rospy.get_param('~ackermann_cmd_topic', '/ackermann_cmd')
     wheelbase = rospy.get_param('~wheelbase', 1.0)
+    max_steering_angle = rospy.get_param('~max_steering_angle', 0.45)
+    max_speed = rospy.get_param('~max_speed', 0.28)
+    allow_reverse = rospy.get_param('~allow_reverse', False)
     frame_id = rospy.get_param('~frame_id', 'odom')
     message_type = rospy.get_param('~message_type', 'ackermann_drive') # ackermann_drive or ackermann_drive_stamped
     
@@ -65,10 +71,16 @@ if __name__ == '__main__':
     else:
       pub = rospy.Publisher(ackermann_cmd_topic, AckermannDriveStamped, queue_size=1)
     
-    rospy.loginfo("Node 'cmd_vel_to_ackermann_drive' started.\nListening to %s, publishing to %s. Frame id: %s, wheelbase: %f", "/cmd_vel", ackermann_cmd_topic, frame_id, wheelbase)
+    rospy.loginfo(
+      "Node 'cmd_vel_to_ackermann_drive' started.\nListening to %s, publishing to %s. Frame id: %s, wheelbase: %f, allow_reverse: %s",
+      twist_cmd_topic,
+      ackermann_cmd_topic,
+      frame_id,
+      wheelbase,
+      str(allow_reverse),
+    )
     
     rospy.spin()
     
   except rospy.ROSInterruptException:
     pass
-

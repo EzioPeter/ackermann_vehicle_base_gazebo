@@ -1,0 +1,180 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="world_name" default="$(find ackermann_vehicle_gazebo)/worlds/sim_world.world"/>
+  <arg name="x" default="-1.0"/>
+  <arg name="y" default="0.0"/>
+  <arg name="z" default="1.2"/>
+  <arg name="roll" default="0.0"/>
+  <arg name="pitch" default="0.0"/>
+  <arg name="yaw" default="1.57"/>
+  <arg name="use_gui" default="true"/>
+  <arg name="enable_rviz" default="true"/>
+  <arg name="planner_frame" default="odom"/>
+  <arg name="ego_goal_topic" default="/ego_goal"/>
+  <arg name="rviz_config" default="$(find ackermann_vehicle_navigation)/config/auto_explore.rviz"/>
+  <arg name="explore_progress_timeout" default="8.0"/>
+  <arg name="explore_min_frontier_size" default="1.2"/>
+  <arg name="explore_min_goal_distance" default="1.0"/>
+  <arg name="explore_goal_blacklist_radius" default="1.0"/>
+  <arg name="explore_potential_scale" default="1.0"/>
+  <arg name="explore_gain_scale" default="2.5"/>
+  <arg name="frontier_timeout_switch_enable" default="true"/>
+  <arg name="frontier_timeout" default="12.0"/>
+  <arg name="frontier_goal_change_tolerance" default="0.35"/>
+  <arg name="goal_reached_tolerance" default="0.6"/>
+  <arg name="safety_max_linear_x" default="0.42"/>
+  <arg name="safety_max_angular_z" default="0.60"/>
+  <arg name="safety_stop_distance" default="0.9"/>
+  <arg name="safety_slow_distance" default="1.8"/>
+  <arg name="safety_front_angle_deg" default="40.0"/>
+  <arg name="safety_min_slow_scale" default="0.42"/>
+  <arg name="safety_slowdown_exponent" default="0.6"/>
+  <arg name="safety_allow_turn_in_place" default="true"/>
+  <arg name="safety_turn_assist_speed" default="0.06"/>
+  <arg name="safety_turn_assist_min_angular" default="0.25"/>
+  <arg name="safety_reverse_escape_distance" default="0.32"/>
+  <arg name="safety_reverse_escape_speed" default="0.05"/>
+  <arg name="safety_unstick_enable" default="true"/>
+  <arg name="safety_unstick_trigger_distance" default="0.36"/>
+  <arg name="safety_unstick_speed_epsilon" default="0.015"/>
+  <arg name="safety_unstick_timeout" default="1.5"/>
+  <arg name="safety_unstick_duration" default="1.1"/>
+  <arg name="safety_unstick_reverse_speed" default="0.10"/>
+  <arg name="safety_unstick_turn_angular" default="0.70"/>
+  <arg name="drive_max_steering_angle" default="0.50"/>
+  <arg name="drive_max_speed" default="0.42"/>
+
+  <include file="$(find ackermann_vehicle_gazebo)/launch/ackermann_vehicle_hokuyo.launch">
+    <arg name="world_name" value="$(arg world_name)"/>
+    <arg name="x" value="$(arg x)"/>
+    <arg name="y" value="$(arg y)"/>
+    <arg name="z" value="$(arg z)"/>
+    <arg name="roll" value="$(arg roll)"/>
+    <arg name="pitch" value="$(arg pitch)"/>
+    <arg name="yaw" value="$(arg yaw)"/>
+    <arg name="gui" value="$(arg use_gui)"/>
+    <arg name="headless" value="$(eval not arg('use_gui'))"/>
+  </include>
+
+  <node pkg="ackermann_vehicle_navigation" type="cmd_vel_to_ackermann_drive.py" name="cmd_vel_to_ackermann" output="screen">
+    <param name="twist_cmd_topic" value="/cmd_vel"/>
+    <param name="ackermann_cmd_topic" value="/ackermann_cmd"/>
+    <param name="wheelbase" value="0.335"/>
+    <param name="max_steering_angle" value="$(arg drive_max_steering_angle)"/>
+    <param name="max_speed" value="$(arg drive_max_speed)"/>
+    <param name="allow_reverse" value="false"/>
+  </node>
+
+  <node pkg="ackermann_vehicle_navigation" type="gazebo_modelstate_to_odom.py" name="gazebo_modelstate_to_odom" output="screen">
+    <param name="model_name" value="ackermann_vehicle"/>
+    <param name="odom_frame" value="odom"/>
+    <param name="base_frame" value="base_link"/>
+  </node>
+
+  <node pkg="ackermann_vehicle_navigation" type="scan_to_world_cloud.py" name="scan_to_world_cloud" output="screen">
+    <param name="scan_topic" value="/ackermann_vehicle/scan"/>
+    <param name="cloud_topic" value="/cloud_registered"/>
+    <param name="target_frame" value="$(arg planner_frame)"/>
+  </node>
+
+  <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen">
+    <remap from="scan" to="/ackermann_vehicle/scan"/>
+    <param name="base_frame" value="base_link"/>
+    <param name="odom_frame" value="odom"/>
+    <param name="map_update_interval" value="2.0"/>
+    <param name="linearUpdate" value="0.3"/>
+    <param name="angularUpdate" value="0.2"/>
+  </node>
+
+  <node pkg="move_base" type="move_base" name="move_base" output="screen">
+    <remap from="cmd_vel" to="/cmd_vel_nav"/>
+    <rosparam file="$(find ackermann_vehicle_navigation)/config/costmap_common.yaml" command="load" ns="global_costmap"/>
+    <rosparam file="$(find ackermann_vehicle_navigation)/config/costmap_common.yaml" command="load" ns="local_costmap"/>
+    <rosparam file="$(find ackermann_vehicle_navigation)/config/global_costmap.yaml" command="load"/>
+    <rosparam file="$(find ackermann_vehicle_navigation)/config/local_costmap.yaml" command="load"/>
+    <rosparam file="$(find ackermann_vehicle_navigation)/config/base_local_planner.yaml" command="load"/>
+    <param name="base_global_planner" value="navfn/NavfnROS"/>
+    <param name="base_local_planner" value="base_local_planner/TrajectoryPlannerROS"/>
+  </node>
+
+  <node pkg="explore_lite" type="explore" respawn="false" name="explore" output="screen">
+    <param name="robot_base_frame" value="base_link"/>
+    <param name="costmap_topic" value="move_base/global_costmap/costmap"/>
+    <param name="costmap_updates_topic" value="move_base/global_costmap/costmap_updates"/>
+    <param name="visualize" value="true"/>
+    <param name="planner_frequency" value="0.33"/>
+    <param name="progress_timeout" value="$(arg explore_progress_timeout)"/>
+    <param name="potential_scale" value="$(arg explore_potential_scale)"/>
+    <param name="orientation_scale" value="0.0"/>
+    <param name="gain_scale" value="$(arg explore_gain_scale)"/>
+    <param name="transform_tolerance" value="0.3"/>
+    <param name="min_frontier_size" value="$(arg explore_min_frontier_size)"/>
+    <param name="min_goal_distance" value="$(arg explore_min_goal_distance)"/>
+    <param name="goal_blacklist_radius" value="$(arg explore_goal_blacklist_radius)"/>
+  </node>
+
+  <node pkg="ackermann_vehicle_navigation" type="move_base_goal_bridge.py" name="move_base_goal_bridge" output="screen">
+    <param name="input_topic" value="/move_base/current_goal"/>
+    <param name="output_topic" value="$(arg ego_goal_topic)"/>
+    <param name="output_frame" value="$(arg planner_frame)"/>
+    <param name="enable_frontier_timeout_switch" value="$(arg frontier_timeout_switch_enable)"/>
+    <param name="frontier_timeout" value="$(arg frontier_timeout)"/>
+    <param name="goal_change_tolerance" value="$(arg frontier_goal_change_tolerance)"/>
+    <param name="goal_reached_tolerance" value="$(arg goal_reached_tolerance)"/>
+  </node>
+
+  <include file="$(find ego_planner)/launch/advanced_param.xml">
+    <arg name="map_size_x_" value="120.0"/>
+    <arg name="map_size_y_" value="120.0"/>
+    <arg name="map_size_z_" value="1.0"/>
+    <arg name="odometry_topic" value="/odom"/>
+    <arg name="camera_pose_topic" value="nouse1"/>
+    <arg name="depth_topic" value="nouse2"/>
+    <arg name="cloud_topic" value="/cloud_registered"/>
+
+    <arg name="cx" value="321.04638671875"/>
+    <arg name="cy" value="243.44969177246094"/>
+    <arg name="fx" value="387.229248046875"/>
+    <arg name="fy" value="387.229248046875"/>
+    <arg name="map_frame" value="$(arg planner_frame)"/>
+
+    <arg name="max_vel" value="0.50"/>
+    <arg name="max_acc" value="0.30"/>
+    <arg name="planning_horizon" value="7.5"/>
+
+    <arg name="flight_type" value="1"/>
+    <arg name="point_num" value="5"/>
+    <arg name="point0_x" value="-15.0"/>
+    <arg name="point0_y" value="0.0"/>
+    <arg name="point0_z" value="1.0"/>
+    <arg name="point1_x" value="0.0"/>
+    <arg name="point1_y" value="15.0"/>
+    <arg name="point1_z" value="1.0"/>
+    <arg name="point2_x" value="15.0"/>
+    <arg name="point2_y" value="0.0"/>
+    <arg name="point2_z" value="1.0"/>
+    <arg name="point3_x" value="0.0"/>
+    <arg name="point3_y" value="-15.0"/>
+    <arg name="point3_z" value="1.0"/>
+    <arg name="point4_x" value="-15.0"/>
+    <arg name="point4_y" value="0.0"/>
+    <arg name="point4_z" value="1.0"/>
+  </include>
+
+  <node pkg="ego_planner" name="traj_server" type="traj_server" output="screen">
+    <remap from="/position_cmd" to="planning/pos_cmd"/>
+    <remap from="/odom_world" to="/odom"/>
+    <param name="traj_server/time_forward" value="1.0" type="double"/>
+  </node>
+
+  <node pkg="waypoint_generator" name="waypoint_generator" type="waypoint_generator" output="screen">
+    <remap from="~odom" to="/odom"/>
+    <remap from="~goal" to="$(arg ego_goal_topic)"/>
+    <remap from="~traj_start_trigger" to="/traj_start_trigger"/>
+    <param name="waypoint_type" value="manual-lonely-waypoint"/>
+  </node>
+
+  <group if="$(arg enable_rviz)">
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rviz_config)" required="false"/>
+  </group>
+</launch>
