@@ -12,16 +12,24 @@
   <arg name="planner_frame" default="odom"/>
   <arg name="ego_goal_topic" default="/ego_goal"/>
   <arg name="rviz_config" default="$(find ackermann_vehicle_navigation)/config/auto_explore.rviz"/>
-  <arg name="explore_progress_timeout" default="8.0"/>
-  <arg name="explore_min_frontier_size" default="1.2"/>
-  <arg name="explore_min_goal_distance" default="1.0"/>
-  <arg name="explore_goal_blacklist_radius" default="1.0"/>
+  <arg name="explore_progress_timeout" default="16.0"/>
+  <arg name="explore_min_frontier_size" default="0.45"/>
+  <arg name="explore_min_goal_distance" default="0.35"/>
+  <arg name="explore_goal_blacklist_radius" default="0.55"/>
+  <arg name="explore_map_progress_timeout" default="22.0"/>
+  <arg name="explore_map_progress_min_delta" default="25"/>
   <arg name="explore_potential_scale" default="1.0"/>
   <arg name="explore_gain_scale" default="2.5"/>
   <arg name="frontier_timeout_switch_enable" default="true"/>
   <arg name="frontier_timeout" default="12.0"/>
   <arg name="frontier_goal_change_tolerance" default="0.35"/>
   <arg name="goal_reached_tolerance" default="0.6"/>
+  <arg name="fallback_explore_enable" default="true"/>
+  <arg name="fallback_idle_timeout" default="3.0"/>
+  <arg name="fallback_period" default="3.0"/>
+  <arg name="fallback_goal_distance" default="5.0"/>
+  <arg name="fallback_goal_min_distance" default="1.2"/>
+  <arg name="fallback_min_clearance" default="0.75"/>
   <arg name="safety_max_linear_x" default="0.42"/>
   <arg name="safety_max_angular_z" default="0.60"/>
   <arg name="safety_stop_distance" default="0.9"/>
@@ -35,12 +43,19 @@
   <arg name="safety_reverse_escape_distance" default="0.32"/>
   <arg name="safety_reverse_escape_speed" default="0.05"/>
   <arg name="safety_unstick_enable" default="true"/>
-  <arg name="safety_unstick_trigger_distance" default="0.36"/>
+  <arg name="safety_unstick_trigger_distance" default="0.85"/>
   <arg name="safety_unstick_speed_epsilon" default="0.015"/>
   <arg name="safety_unstick_timeout" default="1.5"/>
   <arg name="safety_unstick_duration" default="1.1"/>
   <arg name="safety_unstick_reverse_speed" default="0.10"/>
   <arg name="safety_unstick_turn_angular" default="0.70"/>
+  <arg name="safety_idle_escape_enable" default="true"/>
+  <arg name="safety_idle_escape_timeout" default="2.0"/>
+  <arg name="safety_idle_escape_duration" default="1.4"/>
+  <arg name="safety_idle_escape_forward_speed" default="0.12"/>
+  <arg name="safety_idle_escape_reverse_speed" default="0.10"/>
+  <arg name="safety_idle_escape_turn_angular" default="0.55"/>
+  <arg name="safety_idle_escape_front_clearance" default="0.95"/>
   <arg name="drive_max_steering_angle" default="0.50"/>
   <arg name="drive_max_speed" default="0.42"/>
 
@@ -62,7 +77,40 @@
     <param name="wheelbase" value="0.335"/>
     <param name="max_steering_angle" value="$(arg drive_max_steering_angle)"/>
     <param name="max_speed" value="$(arg drive_max_speed)"/>
-    <param name="allow_reverse" value="false"/>
+    <param name="allow_reverse" value="true"/>
+  </node>
+
+  <node pkg="ackermann_vehicle_navigation" type="twist_safety_limiter.py" name="twist_safety_limiter" output="screen">
+    <param name="input_cmd_topic" value="/cmd_vel_raw"/>
+    <param name="output_cmd_topic" value="/cmd_vel"/>
+    <param name="scan_topic" value="/ackermann_vehicle/scan"/>
+    <param name="goal_topic" value="$(arg ego_goal_topic)"/>
+    <param name="max_linear_x" value="$(arg safety_max_linear_x)"/>
+    <param name="max_angular_z" value="$(arg safety_max_angular_z)"/>
+    <param name="stop_distance" value="$(arg safety_stop_distance)"/>
+    <param name="slow_distance" value="$(arg safety_slow_distance)"/>
+    <param name="front_angle_deg" value="$(arg safety_front_angle_deg)"/>
+    <param name="min_slow_scale" value="$(arg safety_min_slow_scale)"/>
+    <param name="slowdown_exponent" value="$(arg safety_slowdown_exponent)"/>
+    <param name="allow_turn_in_place" value="$(arg safety_allow_turn_in_place)"/>
+    <param name="turn_assist_speed" value="$(arg safety_turn_assist_speed)"/>
+    <param name="turn_assist_min_angular" value="$(arg safety_turn_assist_min_angular)"/>
+    <param name="reverse_escape_distance" value="$(arg safety_reverse_escape_distance)"/>
+    <param name="reverse_escape_speed" value="$(arg safety_reverse_escape_speed)"/>
+    <param name="unstick_enable" value="$(arg safety_unstick_enable)"/>
+    <param name="unstick_trigger_distance" value="$(arg safety_unstick_trigger_distance)"/>
+    <param name="unstick_speed_epsilon" value="$(arg safety_unstick_speed_epsilon)"/>
+    <param name="unstick_timeout" value="$(arg safety_unstick_timeout)"/>
+    <param name="unstick_duration" value="$(arg safety_unstick_duration)"/>
+    <param name="unstick_reverse_speed" value="$(arg safety_unstick_reverse_speed)"/>
+    <param name="unstick_turn_angular" value="$(arg safety_unstick_turn_angular)"/>
+    <param name="idle_escape_enable" value="$(arg safety_idle_escape_enable)"/>
+    <param name="idle_escape_timeout" value="$(arg safety_idle_escape_timeout)"/>
+    <param name="idle_escape_duration" value="$(arg safety_idle_escape_duration)"/>
+    <param name="idle_escape_forward_speed" value="$(arg safety_idle_escape_forward_speed)"/>
+    <param name="idle_escape_reverse_speed" value="$(arg safety_idle_escape_reverse_speed)"/>
+    <param name="idle_escape_turn_angular" value="$(arg safety_idle_escape_turn_angular)"/>
+    <param name="idle_escape_front_clearance" value="$(arg safety_idle_escape_front_clearance)"/>
   </node>
 
   <node pkg="ackermann_vehicle_navigation" type="gazebo_modelstate_to_odom.py" name="gazebo_modelstate_to_odom" output="screen">
@@ -111,6 +159,8 @@
     <param name="min_frontier_size" value="$(arg explore_min_frontier_size)"/>
     <param name="min_goal_distance" value="$(arg explore_min_goal_distance)"/>
     <param name="goal_blacklist_radius" value="$(arg explore_goal_blacklist_radius)"/>
+    <param name="map_progress_timeout" value="$(arg explore_map_progress_timeout)"/>
+    <param name="map_progress_min_delta" value="$(arg explore_map_progress_min_delta)"/>
   </node>
 
   <node pkg="ackermann_vehicle_navigation" type="move_base_goal_bridge.py" name="move_base_goal_bridge" output="screen">
@@ -121,6 +171,14 @@
     <param name="frontier_timeout" value="$(arg frontier_timeout)"/>
     <param name="goal_change_tolerance" value="$(arg frontier_goal_change_tolerance)"/>
     <param name="goal_reached_tolerance" value="$(arg goal_reached_tolerance)"/>
+    <param name="enable_fallback_explore" value="$(arg fallback_explore_enable)"/>
+    <param name="fallback_idle_timeout" value="$(arg fallback_idle_timeout)"/>
+    <param name="fallback_period" value="$(arg fallback_period)"/>
+    <param name="fallback_goal_distance" value="$(arg fallback_goal_distance)"/>
+    <param name="fallback_goal_min_distance" value="$(arg fallback_goal_min_distance)"/>
+    <param name="fallback_min_clearance" value="$(arg fallback_min_clearance)"/>
+    <param name="fallback_scan_topic" value="/ackermann_vehicle/scan"/>
+    <param name="fallback_cmd_topic" value="/cmd_vel"/>
   </node>
 
   <include file="$(find ego_planner)/launch/advanced_param.xml">
@@ -163,6 +221,7 @@
 
   <node pkg="ego_planner" name="traj_server" type="traj_server" output="screen">
     <remap from="/position_cmd" to="planning/pos_cmd"/>
+    <remap from="/cmd_vel" to="/cmd_vel_raw"/>
     <remap from="/odom_world" to="/odom"/>
     <param name="traj_server/time_forward" value="1.0" type="double"/>
   </node>
