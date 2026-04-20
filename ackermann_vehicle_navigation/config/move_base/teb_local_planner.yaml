@@ -9,7 +9,7 @@ TebLocalPlannerROS:
   global_plan_overwrite_orientation: true
   allow_init_with_backwards_motion: false
   max_global_plan_lookahead_dist: 4.0
-  global_plan_viapoint_sep: -1.0
+  global_plan_viapoint_sep: 0.50
   feasibility_check_no_poses: 10
   publish_feedback: true
   exact_arc_length: false
@@ -54,3 +54,11 @@ TebLocalPlannerROS:
   weight_optimaltime: 2.0
   weight_obstacle: 220.0
   weight_inflation: 1.20
+  weight_viapoint: 24.0
+
+  enable_homotopy_class_planning: true
+  selection_cost_hysteresis: 1.20
+  selection_prefer_initial_plan: 0.80
+  switching_blocking_period: 4.0
+  viapoints_all_candidates: false
+  oscillation_recovery: true
