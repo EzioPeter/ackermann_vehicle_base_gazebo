@@ -9,9 +9,17 @@ project(ackermann_vehicle_navigation)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   ackermann_msgs
+  actionlib_msgs
+  gazebo_msgs
+  geometry_msgs
+  nav_msgs
   roscpp
   rospy
+  sensor_msgs
   std_msgs
+  tf
+  tf2_geometry_msgs
+  tf2_ros
 )
 
 ## System dependencies are found with CMake's conventions
@@ -106,7 +114,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES ackermann_vehicle_navigation
-#  CATKIN_DEPENDS ackermann_msgs roscpp rospy std_msgs
+#  CATKIN_DEPENDS ackermann_msgs gazebo_msgs geometry_msgs nav_msgs roscpp rospy std_msgs tf tf2_ros
 #  DEPENDS system_lib
 )
 
@@ -160,10 +168,21 @@ include_directories(
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
-# catkin_install_python(PROGRAMS
-#   scripts/my_python_script
-#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+catkin_install_python(PROGRAMS
+  scripts/cmd_vel_to_ackermann_drive.py
+  scripts/frontier_goal_supervisor.py
+  scripts/gazebo_odom_bridge.py
+  scripts/manual_navigation_mode.py
+  scripts/odom_path_publisher.py
+  scripts/path_follower.py
+  scripts/path_follower_tester.py
+  scripts/path_publisher.py
+  scripts/path_publisher_npz.py
+  scripts/tf_odom_publisher.py
+  scripts/tf_odom_publisher_pre.py
+  scripts/twist_safety_limiter.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
@@ -187,11 +206,9 @@ include_directories(
 # )
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
-# install(FILES
-#   # myfile1
-#   # myfile2
-#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-# )
+install(DIRECTORY launch config rviz
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
 
 #############
 ## Testing ##

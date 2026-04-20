@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+
+<launch>
+  <param name="robot_description"
+         command="$(find xacro)/xacro '$(find ackermann_vehicle_description)/urdf/em_3905_hokuyo.urdf.xacro'"/>
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher"
+        type="robot_state_publisher" output="screen"
+        respawn="true" respawn_delay="1.0">
+    <param name="publish_frequency" value="30.0"/>
+    <param name="use_tf_static" value="false"/>
+  </node>
+</launch>

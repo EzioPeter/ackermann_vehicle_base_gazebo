@@ -1,0 +1,15 @@
+transform_tolerance: 0.5
+footprint: [[0.34, 0.23], [0.34, -0.23], [-0.34, -0.23], [-0.34, 0.23]]
+footprint_padding: 0.06
+obstacle_range: 8.0
+raytrace_range: 10.0
+max_obstacle_height: 1.0
+observation_sources: laser_scan_sensor
+
+laser_scan_sensor:
+  topic: /ackermann_vehicle/scan
+  sensor_frame: hokuyo_laser_frame
+  data_type: LaserScan
+  clearing: true
+  marking: true
+  inf_is_valid: true

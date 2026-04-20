@@ -440,17 +440,17 @@ limitations under the License.
 
   <xacro:macro name="hokuyo_laser">
     <gazebo reference="hokuyo_laser_frame">
-      <sensor type="gpu_ray" name="hokuyo_laser">
+      <sensor type="ray" name="hokuyo_laser">
         <pose>0 0 0 0 0 0</pose>
-        <visualize>true</visualize>
-        <update_rate>40</update_rate>
+        <visualize>false</visualize>
+        <update_rate>20</update_rate>
         <ray>
           <scan>
             <horizontal>
-              <samples>720</samples>
+              <samples>1440</samples>
               <resolution>1</resolution>
-              <min_angle>-1.570796</min_angle>
-              <max_angle>1.570796</max_angle>
+              <min_angle>-3.141593</min_angle>
+              <max_angle>3.141593</max_angle>
             </horizontal>
           </scan>
           <range>
@@ -468,9 +468,9 @@ limitations under the License.
             <stddev>0.01</stddev>
           </noise>
         </ray>
-        <plugin name="gazebo_ros_head_hokuyo_controller" filename="libgazebo_ros_gpu_laser.so">
+        <plugin name="gazebo_ros_head_hokuyo_controller" filename="libgazebo_ros_laser.so">
           <topicName>/ackermann_vehicle/scan</topicName>
-          <frameName>hokuyo_link</frameName>
+          <frameName>hokuyo_laser_frame</frameName>
         </plugin>
       </sensor>
     </gazebo>

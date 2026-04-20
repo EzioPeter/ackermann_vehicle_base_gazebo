@@ -1,0 +1,56 @@
+TebLocalPlannerROS:
+  odom_topic: odom
+  map_frame: map
+
+  teb_autosize: true
+  dt_ref: 0.22
+  dt_hysteresis: 0.1
+  max_samples: 500
+  global_plan_overwrite_orientation: true
+  allow_init_with_backwards_motion: false
+  max_global_plan_lookahead_dist: 4.0
+  global_plan_viapoint_sep: -1.0
+  feasibility_check_no_poses: 10
+  publish_feedback: true
+  exact_arc_length: false
+
+  max_vel_x: 0.42
+  max_vel_x_backwards: 0.15
+  max_vel_theta: 0.60
+  acc_lim_x: 0.60
+  acc_lim_theta: 0.70
+  min_turning_radius: 0.85
+  wheelbase: 0.335
+  cmd_angle_instead_rotvel: false
+
+  footprint_model:
+    type: "polygon"
+    vertices: [[0.34, 0.23], [0.34, -0.23], [-0.34, -0.23], [-0.34, 0.23]]
+
+  xy_goal_tolerance: 0.35
+  yaw_goal_tolerance: 0.35
+  free_goal_vel: false
+  complete_global_plan: true
+
+  min_obstacle_dist: 0.55
+  inflation_dist: 0.95
+  include_costmap_obstacles: true
+  costmap_obstacles_behind_robot_dist: 1.0
+  obstacle_poses_affected: 20
+  include_dynamic_obstacles: false
+
+  no_inner_iterations: 5
+  no_outer_iterations: 4
+  optimization_activate: true
+  optimization_verbose: false
+  penalty_epsilon: 0.1
+  weight_max_vel_x: 2.0
+  weight_max_vel_theta: 1.0
+  weight_acc_lim_x: 1.0
+  weight_acc_lim_theta: 1.0
+  weight_kinematics_nh: 1000.0
+  weight_kinematics_forward_drive: 200.0
+  weight_kinematics_turning_radius: 25.0
+  weight_optimaltime: 2.0
+  weight_obstacle: 220.0
+  weight_inflation: 1.20

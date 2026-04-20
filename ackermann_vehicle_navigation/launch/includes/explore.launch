@@ -1,0 +1,35 @@
+<launch>
+  <arg name="planner_frequency" default="0.33"/>
+  <arg name="progress_timeout" default="32.0"/>
+  <arg name="potential_scale" default="1.0"/>
+  <arg name="gain_scale" default="2.5"/>
+  <arg name="transform_tolerance" default="0.3"/>
+  <arg name="min_frontier_size" default="0.45"/>
+  <arg name="min_goal_distance" default="0.35"/>
+  <arg name="goal_blacklist_radius" default="0.55"/>
+  <arg name="goal_aliasing_radius" default="0.9"/>
+  <arg name="travel_point_min_offset" default="0.45"/>
+  <arg name="travel_point_max_offset" default="1.10"/>
+  <arg name="travel_point_clearance" default="0.25"/>
+  <arg name="map_progress_timeout" default="45.0"/>
+  <arg name="map_progress_min_delta" default="25"/>
+
+  <node pkg="explore_lite" type="explore" name="explore" output="screen"
+        clear_params="true" respawn="true" respawn_delay="2.0">
+    <rosparam file="$(find ackermann_vehicle_navigation)/config/explore/explore.yaml" command="load"/>
+    <param name="planner_frequency" value="$(arg planner_frequency)"/>
+    <param name="progress_timeout" value="$(arg progress_timeout)"/>
+    <param name="potential_scale" value="$(arg potential_scale)"/>
+    <param name="gain_scale" value="$(arg gain_scale)"/>
+    <param name="transform_tolerance" value="$(arg transform_tolerance)"/>
+    <param name="min_frontier_size" value="$(arg min_frontier_size)"/>
+    <param name="min_goal_distance" value="$(arg min_goal_distance)"/>
+    <param name="goal_blacklist_radius" value="$(arg goal_blacklist_radius)"/>
+    <param name="goal_aliasing_radius" value="$(arg goal_aliasing_radius)"/>
+    <param name="travel_point_min_offset" value="$(arg travel_point_min_offset)"/>
+    <param name="travel_point_max_offset" value="$(arg travel_point_max_offset)"/>
+    <param name="travel_point_clearance" value="$(arg travel_point_clearance)"/>
+    <param name="map_progress_timeout" value="$(arg map_progress_timeout)"/>
+    <param name="map_progress_min_delta" value="$(arg map_progress_min_delta)"/>
+  </node>
+</launch>

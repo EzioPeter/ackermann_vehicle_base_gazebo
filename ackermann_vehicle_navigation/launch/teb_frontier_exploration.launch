@@ -1,0 +1,301 @@
+<launch>
+  <arg name="world_name" default="$(find ackermann_vehicle_gazebo)/worlds/sim_world.world"/>
+  <arg name="gui" default="true"/>
+  <arg name="paused" default="false"/>
+  <arg name="headless" default="false"/>
+  <arg name="debug" default="false"/>
+  <arg name="use_sim_time" default="true"/>
+  <arg name="rviz" default="true"/>
+  <arg name="slam" default="true"/>
+  <arg name="exploration" default="true"/>
+  <arg name="planner_frame" default="map"/>
+  <arg name="rviz_config" default="$(find ackermann_vehicle_navigation)/rviz/teb_frontier_exploration.rviz"/>
+
+  <arg name="x" default="-1.0"/>
+  <arg name="y" default="0.0"/>
+  <arg name="z" default="1.2"/>
+  <arg name="yaw" default="1.57"/>
+
+  <arg name="drive_max_steering_angle" default="0.38"/>
+  <arg name="drive_max_speed" default="0.55"/>
+  <arg name="drive_allow_reverse" default="true"/>
+
+  <arg name="rollover_guard_enable" default="true"/>
+  <arg name="rollover_max_tilt_deg" default="18.0"/>
+  <arg name="rollover_stable_tilt_deg" default="8.0"/>
+  <arg name="rollover_hold_time" default="0.35"/>
+  <arg name="rollover_reset_cooldown" default="2.0"/>
+  <arg name="suppress_odom_when_tilted" default="true"/>
+
+  <arg name="explore_progress_timeout" default="32.0"/>
+  <arg name="explore_min_frontier_size" default="0.45"/>
+  <arg name="explore_min_goal_distance" default="0.35"/>
+  <arg name="explore_goal_blacklist_radius" default="0.55"/>
+  <arg name="explore_goal_aliasing_radius" default="0.9"/>
+  <arg name="explore_travel_point_min_offset" default="0.45"/>
+  <arg name="explore_travel_point_max_offset" default="1.10"/>
+  <arg name="explore_travel_point_clearance" default="0.25"/>
+  <arg name="explore_map_progress_timeout" default="45.0"/>
+  <arg name="explore_map_progress_min_delta" default="25"/>
+  <arg name="explore_potential_scale" default="1.0"/>
+  <arg name="explore_gain_scale" default="2.5"/>
+
+  <arg name="frontier_timeout_switch_enable" default="true"/>
+  <arg name="frontier_timeout" default="24.0"/>
+  <arg name="frontier_goal_change_tolerance" default="0.35"/>
+  <arg name="goal_reached_tolerance" default="0.6"/>
+  <arg name="frontier_progress_epsilon" default="0.35"/>
+  <arg name="frontier_motion_epsilon" default="0.25"/>
+  <arg name="force_escape_enable" default="true"/>
+  <arg name="force_escape_hold" default="10.0"/>
+  <arg name="force_escape_cooldown" default="8.0"/>
+  <arg name="force_escape_on_abort" default="true"/>
+  <arg name="explore_pause_param" default="/explore/suspend_until"/>
+  <arg name="fallback_explore_enable" default="true"/>
+  <arg name="fallback_idle_timeout" default="8.0"/>
+  <arg name="fallback_period" default="3.0"/>
+  <arg name="fallback_startup_grace" default="10.0"/>
+  <arg name="fallback_goal_distance" default="1.8"/>
+  <arg name="fallback_goal_min_distance" default="0.8"/>
+  <arg name="fallback_min_clearance" default="1.20"/>
+  <arg name="local_plan_escape_goal_distance" default="1.0"/>
+  <arg name="local_plan_guard_enable" default="true"/>
+  <arg name="local_plan_guard_lookahead" default="1.80"/>
+  <arg name="local_plan_guard_margin" default="0.25"/>
+  <arg name="local_plan_guard_window_deg" default="12.0"/>
+  <arg name="local_plan_guard_min_distance" default="0.25"/>
+  <arg name="local_plan_guard_cooldown" default="1.5"/>
+  <arg name="local_plan_guard_immediate" default="true"/>
+  <arg name="local_plan_guard_clear_visual_on_block" default="true"/>
+  <arg name="local_plan_guard_segment_step" default="0.05"/>
+  <arg name="local_plan_guard_brake_duration" default="1.0"/>
+  <arg name="local_plan_guard_map_start_ignore" default="0.90"/>
+  <arg name="local_plan_guard_map_clearance" default="0.28"/>
+  <arg name="local_plan_guard_map_occupied_threshold" default="50"/>
+  <arg name="local_plan_guard_unknown_is_blocked" default="false"/>
+  <arg name="local_plan_guard_blocked_angle_ttl" default="18.0"/>
+  <arg name="local_plan_guard_blocked_angle_window_deg" default="35.0"/>
+  <arg name="local_plan_guard_max_blocked_angles" default="8"/>
+  <arg name="motion_brake_param" default="/teb_frontier/brake_until"/>
+  <arg name="manual_mode_param" default="/teb_frontier/manual_mode"/>
+
+  <arg name="safety_max_linear_x" default="0.44"/>
+  <arg name="safety_max_angular_z" default="0.60"/>
+  <arg name="safety_stop_distance" default="0.95"/>
+  <arg name="safety_slow_distance" default="1.80"/>
+  <arg name="safety_front_angle_deg" default="42.0"/>
+  <arg name="safety_collision_half_width" default="0.34"/>
+  <arg name="safety_collision_min_forward" default="0.10"/>
+  <arg name="safety_rear_angle_deg" default="70.0"/>
+  <arg name="safety_rear_stop_distance" default="0.60"/>
+  <arg name="safety_rear_slow_distance" default="1.20"/>
+  <arg name="safety_rear_min_slow_scale" default="0.12"/>
+  <arg name="safety_turning_side_stop_distance" default="0.60"/>
+  <arg name="safety_turning_side_slow_distance" default="1.05"/>
+  <arg name="safety_turning_side_min_slow_scale" default="0.10"/>
+  <arg name="safety_min_slow_scale" default="0.45"/>
+  <arg name="safety_slowdown_exponent" default="0.6"/>
+  <arg name="safety_allow_turn_in_place" default="true"/>
+  <arg name="safety_turn_assist_speed" default="0.00"/>
+  <arg name="safety_turn_assist_min_angular" default="0.12"/>
+  <arg name="safety_reverse_escape_distance" default="0.32"/>
+  <arg name="safety_reverse_escape_speed" default="0.05"/>
+  <arg name="safety_unstick_enable" default="true"/>
+  <arg name="safety_unstick_trigger_distance" default="0.95"/>
+  <arg name="safety_unstick_speed_epsilon" default="0.015"/>
+  <arg name="safety_unstick_timeout" default="1.5"/>
+  <arg name="safety_unstick_duration" default="1.1"/>
+  <arg name="safety_unstick_reverse_speed" default="0.08"/>
+  <arg name="safety_unstick_turn_angular" default="0.22"/>
+  <arg name="safety_idle_escape_enable" default="false"/>
+  <arg name="safety_idle_escape_timeout" default="2.0"/>
+  <arg name="safety_idle_escape_duration" default="1.4"/>
+  <arg name="safety_idle_escape_forward_speed" default="0.10"/>
+  <arg name="safety_idle_escape_reverse_speed" default="0.08"/>
+  <arg name="safety_idle_escape_turn_angular" default="0.18"/>
+  <arg name="safety_idle_escape_front_clearance" default="1.10"/>
+
+  <param name="use_sim_time" value="$(arg use_sim_time)"/>
+  <param name="/explore/suspend_until" value="0.0"/>
+  <param name="/teb_frontier/brake_until" value="0.0"/>
+  <param name="/teb_frontier/manual_mode" value="false"/>
+
+  <include file="$(find ackermann_vehicle_gazebo)/launch/ackermann_vehicle_hokuyo_noetic.launch">
+    <arg name="world_name" value="$(arg world_name)"/>
+    <arg name="gui" value="$(arg gui)"/>
+    <arg name="paused" value="$(arg paused)"/>
+    <arg name="headless" value="$(arg headless)"/>
+    <arg name="debug" value="$(arg debug)"/>
+    <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+    <arg name="x" value="$(arg x)"/>
+    <arg name="y" value="$(arg y)"/>
+    <arg name="z" value="$(arg z)"/>
+    <arg name="yaw" value="$(arg yaw)"/>
+  </include>
+
+  <node pkg="ackermann_vehicle_navigation" type="gazebo_odom_bridge.py"
+        name="gazebo_odom_bridge" output="screen">
+    <param name="model_name" value="ackermann_vehicle"/>
+    <param name="odom_frame" value="odom"/>
+    <param name="base_frame" value="base_link"/>
+    <param name="secondary_odom_topic" value="/Odometry"/>
+    <param name="publish_tf" value="true"/>
+    <param name="publish_rate" value="30.0"/>
+    <param name="planar_mode" value="true"/>
+    <param name="rollover_guard_enable" value="$(arg rollover_guard_enable)"/>
+    <param name="rollover_max_tilt_deg" value="$(arg rollover_max_tilt_deg)"/>
+    <param name="rollover_stable_tilt_deg" value="$(arg rollover_stable_tilt_deg)"/>
+    <param name="rollover_hold_time" value="$(arg rollover_hold_time)"/>
+    <param name="rollover_reset_cooldown" value="$(arg rollover_reset_cooldown)"/>
+    <param name="suppress_odom_when_tilted" value="$(arg suppress_odom_when_tilted)"/>
+    <param name="reset_pose_x" value="$(arg x)"/>
+    <param name="reset_pose_y" value="$(arg y)"/>
+    <param name="reset_pose_z" value="$(arg z)"/>
+    <param name="reset_pose_yaw" value="$(arg yaw)"/>
+  </node>
+
+  <node pkg="ackermann_vehicle_navigation" type="odom_path_publisher.py"
+        name="odom_path_publisher" output="screen">
+    <param name="odom_topic" value="/odom"/>
+    <param name="path_topic" value="/odom_visualization/path"/>
+    <param name="min_step" value="0.04"/>
+    <param name="max_poses" value="2500"/>
+  </node>
+
+  <node pkg="ackermann_vehicle_navigation" type="cmd_vel_to_ackermann_drive.py"
+        name="cmd_vel_to_ackermann_drive" output="screen">
+    <param name="twist_cmd_topic" value="/cmd_vel"/>
+    <param name="ackermann_cmd_topic" value="/ackermann_cmd"/>
+    <param name="wheelbase" value="0.335"/>
+    <param name="max_steering_angle" value="$(arg drive_max_steering_angle)"/>
+    <param name="max_speed" value="$(arg drive_max_speed)"/>
+    <param name="allow_reverse" value="$(arg drive_allow_reverse)"/>
+    <param name="message_type" value="ackermann_drive"/>
+  </node>
+
+  <group if="$(arg slam)">
+    <include file="$(find ackermann_vehicle_navigation)/launch/includes/slam_gmapping.launch"/>
+  </group>
+
+  <include file="$(find ackermann_vehicle_navigation)/launch/includes/move_base_teb.launch"/>
+
+  <group if="$(arg exploration)">
+    <include file="$(find ackermann_vehicle_navigation)/launch/includes/explore.launch">
+      <arg name="planner_frequency" value="0.33"/>
+      <arg name="progress_timeout" value="$(arg explore_progress_timeout)"/>
+      <arg name="potential_scale" value="$(arg explore_potential_scale)"/>
+      <arg name="gain_scale" value="$(arg explore_gain_scale)"/>
+      <arg name="transform_tolerance" value="0.3"/>
+      <arg name="min_frontier_size" value="$(arg explore_min_frontier_size)"/>
+      <arg name="min_goal_distance" value="$(arg explore_min_goal_distance)"/>
+      <arg name="goal_blacklist_radius" value="$(arg explore_goal_blacklist_radius)"/>
+      <arg name="goal_aliasing_radius" value="$(arg explore_goal_aliasing_radius)"/>
+      <arg name="travel_point_min_offset" value="$(arg explore_travel_point_min_offset)"/>
+      <arg name="travel_point_max_offset" value="$(arg explore_travel_point_max_offset)"/>
+      <arg name="travel_point_clearance" value="$(arg explore_travel_point_clearance)"/>
+      <arg name="map_progress_timeout" value="$(arg explore_map_progress_timeout)"/>
+      <arg name="map_progress_min_delta" value="$(arg explore_map_progress_min_delta)"/>
+    </include>
+  </group>
+
+  <node pkg="ackermann_vehicle_navigation" type="twist_safety_limiter.py"
+        name="twist_safety_limiter" output="screen">
+    <param name="input_cmd_topic" value="/cmd_vel_nav_raw"/>
+    <param name="output_cmd_topic" value="/cmd_vel"/>
+    <param name="scan_topic" value="/ackermann_vehicle/scan"/>
+    <param name="goal_topic" value="/move_base/current_goal"/>
+    <param name="move_base_status_topic" value="/move_base/status"/>
+    <param name="external_pause_param" value="$(arg explore_pause_param)"/>
+    <param name="external_brake_param" value="$(arg motion_brake_param)"/>
+    <param name="max_linear_x" value="$(arg safety_max_linear_x)"/>
+    <param name="max_angular_z" value="$(arg safety_max_angular_z)"/>
+    <param name="stop_distance" value="$(arg safety_stop_distance)"/>
+    <param name="slow_distance" value="$(arg safety_slow_distance)"/>
+    <param name="front_angle_deg" value="$(arg safety_front_angle_deg)"/>
+    <param name="collision_half_width" value="$(arg safety_collision_half_width)"/>
+    <param name="collision_min_forward" value="$(arg safety_collision_min_forward)"/>
+    <param name="rear_angle_deg" value="$(arg safety_rear_angle_deg)"/>
+    <param name="rear_stop_distance" value="$(arg safety_rear_stop_distance)"/>
+    <param name="rear_slow_distance" value="$(arg safety_rear_slow_distance)"/>
+    <param name="rear_min_slow_scale" value="$(arg safety_rear_min_slow_scale)"/>
+    <param name="turning_side_stop_distance" value="$(arg safety_turning_side_stop_distance)"/>
+    <param name="turning_side_slow_distance" value="$(arg safety_turning_side_slow_distance)"/>
+    <param name="turning_side_min_slow_scale" value="$(arg safety_turning_side_min_slow_scale)"/>
+    <param name="min_slow_scale" value="$(arg safety_min_slow_scale)"/>
+    <param name="slowdown_exponent" value="$(arg safety_slowdown_exponent)"/>
+    <param name="allow_turn_in_place" value="$(arg safety_allow_turn_in_place)"/>
+    <param name="turn_assist_speed" value="$(arg safety_turn_assist_speed)"/>
+    <param name="turn_assist_min_angular" value="$(arg safety_turn_assist_min_angular)"/>
+    <param name="reverse_escape_distance" value="$(arg safety_reverse_escape_distance)"/>
+    <param name="reverse_escape_speed" value="$(arg safety_reverse_escape_speed)"/>
+    <param name="unstick_enable" value="$(arg safety_unstick_enable)"/>
+    <param name="unstick_trigger_distance" value="$(arg safety_unstick_trigger_distance)"/>
+    <param name="unstick_speed_epsilon" value="$(arg safety_unstick_speed_epsilon)"/>
+    <param name="unstick_timeout" value="$(arg safety_unstick_timeout)"/>
+    <param name="unstick_duration" value="$(arg safety_unstick_duration)"/>
+    <param name="unstick_reverse_speed" value="$(arg safety_unstick_reverse_speed)"/>
+    <param name="unstick_turn_angular" value="$(arg safety_unstick_turn_angular)"/>
+    <param name="idle_escape_enable" value="$(arg safety_idle_escape_enable)"/>
+    <param name="idle_escape_timeout" value="$(arg safety_idle_escape_timeout)"/>
+    <param name="idle_escape_duration" value="$(arg safety_idle_escape_duration)"/>
+    <param name="idle_escape_forward_speed" value="$(arg safety_idle_escape_forward_speed)"/>
+    <param name="idle_escape_reverse_speed" value="$(arg safety_idle_escape_reverse_speed)"/>
+    <param name="idle_escape_turn_angular" value="$(arg safety_idle_escape_turn_angular)"/>
+    <param name="idle_escape_front_clearance" value="$(arg safety_idle_escape_front_clearance)"/>
+    <param name="idle_escape_require_active_goal" value="true"/>
+  </node>
+
+  <node pkg="ackermann_vehicle_navigation" type="frontier_goal_supervisor.py"
+        name="frontier_goal_supervisor" output="screen">
+    <param name="input_topic" value="/move_base/current_goal"/>
+    <param name="fallback_goal_topic" value="/move_base_simple/goal"/>
+    <param name="output_frame" value="$(arg planner_frame)"/>
+    <param name="enable_frontier_timeout_switch" value="$(arg frontier_timeout_switch_enable)"/>
+    <param name="frontier_timeout" value="$(arg frontier_timeout)"/>
+    <param name="goal_change_tolerance" value="$(arg frontier_goal_change_tolerance)"/>
+    <param name="goal_reached_tolerance" value="$(arg goal_reached_tolerance)"/>
+    <param name="frontier_progress_epsilon" value="$(arg frontier_progress_epsilon)"/>
+    <param name="frontier_motion_epsilon" value="$(arg frontier_motion_epsilon)"/>
+    <param name="force_escape_enable" value="$(arg force_escape_enable)"/>
+    <param name="force_escape_hold" value="$(arg force_escape_hold)"/>
+    <param name="force_escape_cooldown" value="$(arg force_escape_cooldown)"/>
+    <param name="force_escape_on_abort" value="$(arg force_escape_on_abort)"/>
+    <param name="explore_pause_param" value="$(arg explore_pause_param)"/>
+    <param name="motion_brake_param" value="$(arg motion_brake_param)"/>
+    <param name="manual_mode_param" value="$(arg manual_mode_param)"/>
+    <param name="enable_fallback_explore" value="$(arg fallback_explore_enable)"/>
+    <param name="fallback_idle_timeout" value="$(arg fallback_idle_timeout)"/>
+    <param name="fallback_period" value="$(arg fallback_period)"/>
+    <param name="fallback_startup_grace" value="$(arg fallback_startup_grace)"/>
+    <param name="fallback_goal_distance" value="$(arg fallback_goal_distance)"/>
+    <param name="fallback_goal_min_distance" value="$(arg fallback_goal_min_distance)"/>
+    <param name="fallback_min_clearance" value="$(arg fallback_min_clearance)"/>
+    <param name="local_plan_escape_goal_distance" value="$(arg local_plan_escape_goal_distance)"/>
+    <param name="fallback_scan_topic" value="/ackermann_vehicle/scan"/>
+    <param name="fallback_cmd_topic" value="/cmd_vel"/>
+    <param name="local_plan_guard_enable" value="$(arg local_plan_guard_enable)"/>
+    <param name="local_plan_topic" value="/move_base/TebLocalPlannerROS/local_plan"/>
+    <param name="local_plan_visual_topic" value="/teb_frontier/local_plan_safe"/>
+    <param name="local_plan_guard_lookahead" value="$(arg local_plan_guard_lookahead)"/>
+    <param name="local_plan_guard_margin" value="$(arg local_plan_guard_margin)"/>
+    <param name="local_plan_guard_window_deg" value="$(arg local_plan_guard_window_deg)"/>
+    <param name="local_plan_guard_min_distance" value="$(arg local_plan_guard_min_distance)"/>
+    <param name="local_plan_guard_cooldown" value="$(arg local_plan_guard_cooldown)"/>
+    <param name="local_plan_guard_immediate" value="$(arg local_plan_guard_immediate)"/>
+    <param name="local_plan_guard_clear_visual_on_block" value="$(arg local_plan_guard_clear_visual_on_block)"/>
+    <param name="local_plan_guard_segment_step" value="$(arg local_plan_guard_segment_step)"/>
+    <param name="local_plan_guard_brake_duration" value="$(arg local_plan_guard_brake_duration)"/>
+    <param name="local_plan_guard_map_start_ignore" value="$(arg local_plan_guard_map_start_ignore)"/>
+    <param name="local_plan_guard_map_topic" value="/map"/>
+    <param name="local_plan_guard_map_clearance" value="$(arg local_plan_guard_map_clearance)"/>
+    <param name="local_plan_guard_map_occupied_threshold" value="$(arg local_plan_guard_map_occupied_threshold)"/>
+    <param name="local_plan_guard_unknown_is_blocked" value="$(arg local_plan_guard_unknown_is_blocked)"/>
+    <param name="local_plan_guard_blocked_angle_ttl" value="$(arg local_plan_guard_blocked_angle_ttl)"/>
+    <param name="local_plan_guard_blocked_angle_window_deg" value="$(arg local_plan_guard_blocked_angle_window_deg)"/>
+    <param name="local_plan_guard_max_blocked_angles" value="$(arg local_plan_guard_max_blocked_angles)"/>
+    <rosparam param="stop_cmd_topics">[/cmd_vel_nav_raw, /cmd_vel]</rosparam>
+  </node>
+
+  <node if="$(arg rviz)" pkg="rviz" type="rviz" name="rviz" output="screen"
+        args="-d $(arg rviz_config)"/>
+</launch>

@@ -1,0 +1,21 @@
+<launch>
+  <arg name="manual_mode_param" default="/teb_frontier/manual_mode"/>
+  <arg name="explore_pause_param" default="/explore/suspend_until"/>
+  <arg name="motion_brake_param" default="/teb_frontier/brake_until"/>
+  <arg name="pause_horizon" default="30.0"/>
+  <arg name="refresh_period" default="1.0"/>
+  <arg name="cancel_retries" default="3"/>
+  <arg name="cancel_period" default="0.4"/>
+
+  <node pkg="ackermann_vehicle_navigation" type="manual_navigation_mode.py"
+        name="manual_navigation_mode" output="screen">
+    <param name="manual_mode_param" value="$(arg manual_mode_param)"/>
+    <param name="explore_pause_param" value="$(arg explore_pause_param)"/>
+    <param name="motion_brake_param" value="$(arg motion_brake_param)"/>
+    <param name="pause_horizon" value="$(arg pause_horizon)"/>
+    <param name="refresh_period" value="$(arg refresh_period)"/>
+    <param name="cancel_retries" value="$(arg cancel_retries)"/>
+    <param name="cancel_period" value="$(arg cancel_period)"/>
+    <rosparam param="stop_cmd_topics">[/cmd_vel_nav_raw, /cmd_vel]</rosparam>
+  </node>
+</launch>
